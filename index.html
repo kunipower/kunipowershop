@@ -145,7 +145,7 @@
         .highlight-box {
             background: rgba(139, 92, 246, 0.1);
             border-left: 3px solid var(--primary);
-            padding: 10px 15px;
+            padding: 15px;
             margin: 10px 0;
             border-radius: 0 8px 8px 0;
             font-size: 13px;
@@ -217,18 +217,23 @@
             border: 1px solid var(--balance-color);
             padding: 10px 20px;
             border-radius: 8px;
-            text-decoration: none;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.2s;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
+            cursor: pointer;
         }
 
         .action-button:hover {
             background: var(--balance-color);
             color: #000;
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+        
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -245,7 +250,6 @@
             <p class="subtitle">Ваш личный доступ и пошаговые инструкции для настройки</p>
         </div>
 
-        <!-- КЛЮЧ И БАЛАНС -->
         <div class="card">
             <div class="card-header">
                 <h2>🔑 ВАШ API-КЛЮЧ И БАЛАНС</h2>
@@ -259,14 +263,13 @@
 
             <div class="highlight-box" style="margin-top: 20px; border-left-color: var(--balance-color);">
                 <strong style="color: var(--balance-color);">Как проверить остаток токенов?</strong><br>
-                Вы можете самостоятельно отслеживать свой баланс в реальном времени на сайте провайдера.
+                Нажмите кнопку ниже, чтобы запросить ваш актуальный баланс напрямую у провайдера.
                 <br>
-                <a href="https://api.nghimmo.com/check-balance" target="_blank" class="action-button">📊 Проверить баланс</a>
-                <p style="font-size: 12px; margin-top: 8px; color: #8b8b9e;">* Нажмите на кнопку, вставьте ваш скопированный API-ключ в поле на открывшемся сайте и нажмите Check.</p>
+                <button id="checkBalanceBtn" class="action-button" onclick="checkBalance()">📊 Проверить баланс</button>
+                <div id="balanceResult" style="margin-top: 15px; font-weight: 500; font-size: 14px; display: none; padding: 12px; border-radius: 8px; background: rgba(0,0,0,0.3); border-left: 3px solid transparent;"></div>
             </div>
         </div>
 
-        <!-- ИНСТРУКЦИЯ CURSOR -->
         <div class="card">
             <div class="card-header">
                 <h2>1. ИНСТРУКЦИЯ ДЛЯ CURSOR</h2>
@@ -289,7 +292,6 @@ Model:    claude-4.8-opus</pre>
             </div>
         </div>
 
-        <!-- ИНСТРУКЦИЯ ROO CODE / CLINE -->
         <div class="card">
             <div class="card-header">
                 <h2>2. РАСШИРЕНИЯ VS CODE (ROO CODE / CLINE)</h2>
@@ -310,7 +312,6 @@ Model ID:     claude-4.8-opus</pre>
             </div>
         </div>
 
-        <!-- ИНСТРУКЦИЯ CLAUDE CODE -->
         <div class="card">
             <div class="card-header">
                 <h2>3. CLAUDE CODE (ТЕРМИНАЛ / CLI)</h2>
@@ -379,6 +380,70 @@ Model ID:     claude-4.8-opus</pre>
                     btnElement.classList.remove('copied');
                 }, 2500);
             });
+        }
+
+        // АСИНХРОННАЯ ФУНКЦИЯ ПРОВЕРКИ БАЛАНСА
+        async function checkBalance() {
+            const btn = document.getElementById('checkBalanceBtn');
+            const resultDiv = document.getElementById('balanceResult');
+
+            if (!apiKey || apiKey.length < 5) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.color = '#ef4444';
+                resultDiv.style.borderLeftColor = '#ef4444';
+                resultDiv.innerHTML = "❌ <b>Ошибка:</b> API-ключ не найден в ссылке.";
+                return;
+            }
+
+            btn.innerText = "⏳ Выполняю запрос...";
+            btn.disabled = true;
+
+            try {
+                // Обращаемся к стандартному биллинг-эндпоинту OpenAI, который используют 99% прокси-серверов
+                const response = await fetch('https://api.nghimmo.com/v1/dashboard/billing/subscription', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // В системах вроде One-API баланс обычно лежит в hard_limit_usd
+                    const limit = data.hard_limit_usd !== undefined ? data.hard_limit_usd : data.total_available;
+                    
+                    resultDiv.style.display = 'block';
+                    if (limit !== undefined) {
+                        resultDiv.style.color = '#22c55e';
+                        resultDiv.style.borderLeftColor = '#22c55e';
+                        resultDiv.innerHTML = `✅ <b>Остаток токенов:</b> ${limit} у.е.`;
+                    } else {
+                        // Если ответ успешный, но поле называется иначе
+                        resultDiv.style.color = '#22c55e';
+                        resultDiv.style.borderLeftColor = '#22c55e';
+                        resultDiv.innerHTML = `✅ <b>Ключ активен.</b> (Точная сумма скрыта провайдером).`;
+                    }
+                } else {
+                    // Сервер ответил ошибкой (например, 401 Unauthorized или 404)
+                    resultDiv.style.display = 'block';
+                    resultDiv.style.color = '#f59e0b';
+                    resultDiv.style.borderLeftColor = '#f59e0b';
+                    resultDiv.innerHTML = `⚠️ <b>Ошибка провайдера:</b> Сервер вернул код ${response.status}. Проверьте баланс вручную.`;
+                }
+            } catch (error) {
+                // Если сработала защита CORS или нет интернета
+                resultDiv.style.display = 'block';
+                resultDiv.style.color = '#f59e0b';
+                resultDiv.style.borderLeftColor = '#f59e0b';
+                resultDiv.innerHTML = `⚠️ <b>Защита сервера:</b> Провайдер блокирует прямую проверку баланса со сторонних сайтов.`;
+            }
+
+            // Возвращаем кнопку в исходное состояние
+            setTimeout(() => {
+                btn.innerText = "📊 Проверить баланс";
+                btn.disabled = false;
+            }, 1000);
         }
     </script>
 </body>
