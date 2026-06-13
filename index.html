@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель управления API | Доступ</title>
+    <title>Доступ к API | Инструкция</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -20,6 +20,7 @@
             --success-bg: rgba(34, 197, 94, 0.1);
             --error: #ef4444;
             --error-bg: rgba(239, 68, 68, 0.1);
+            --balance-color: #f59e0b;
         }
 
         body {
@@ -32,14 +33,14 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 760px;
+            max-width: 800px;
             width: 100%;
         }
 
-        /* Статус подключения */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -52,7 +53,6 @@
             font-weight: 600;
             margin-bottom: 25px;
             border: 1px solid rgba(34, 197, 94, 0.2);
-            transition: all 0.3s ease;
         }
 
         .status-badge.error {
@@ -78,7 +78,7 @@
             font-size: 32px;
             font-weight: 700;
             margin: 0 0 10px 0;
-            letter-spacing: -0.5px;
+            text-align: center;
         }
 
         h1 span {
@@ -90,10 +90,10 @@
         .subtitle {
             color: var(--text-muted);
             font-size: 15px;
+            text-align: center;
             margin-bottom: 35px;
         }
 
-        /* Карточки */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -108,36 +108,49 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 20px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            padding-bottom: 10px;
         }
 
         .card-header h2 {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: var(--accent);
+            text-transform: uppercase;
         }
 
-        .step-info {
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .step-list li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
             font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #cbd5e1;
         }
 
-        .path-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #e2e8f0;
+        .step-list li::before {
+            content: '👾';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 14px;
         }
 
-        /* Блоки с кодом */
+        .highlight-box {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+        }
+
         .code-wrapper {
             position: relative;
             background: #0b0b10;
@@ -161,7 +174,6 @@
             font-weight: 600;
         }
 
-        /* Кнопки копирования */
         .copy-btn {
             position: absolute;
             top: 12px;
@@ -175,19 +187,11 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 10px rgba(139, 92, 246, 0.2);
         }
 
-        .copy-btn:hover {
-            background: var(--primary-hover);
-        }
+        .copy-btn:hover { background: var(--primary-hover); }
+        .copy-btn.copied { background: var(--success); }
 
-        .copy-btn.copied {
-            background: var(--success);
-            box-shadow: 0 2px 10px rgba(34, 197, 94, 0.2);
-        }
-
-        /* Блок отдельного ключа */
         .key-display-box {
             display: flex;
             align-items: center;
@@ -200,10 +204,31 @@
 
         .key-text {
             font-family: monospace;
-            font-size: 15px;
+            font-size: 16px;
             color: #2dd4bf;
             word-break: break-all;
             padding-right: 20px;
+        }
+
+        .action-button {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--balance-color);
+            border: 1px solid var(--balance-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .action-button:hover {
+            background: var(--balance-color);
+            color: #000;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
         }
     </style>
 </head>
@@ -216,74 +241,107 @@
                 <span class="dot"></span>
                 <span id="statusText">Проверка...</span>
             </div>
-            
-            <h1>Панель управления <span>API</span></h1>
-            <p class="subtitle">Ваши персональные данные для интеграции с нейросетями</p>
+            <h1>Подключение <span>API</span></h1>
+            <p class="subtitle">Ваш личный доступ и пошаговые инструкции для настройки</p>
         </div>
 
-        <!-- Секция 0: Чистый API ключ -->
+        <!-- КЛЮЧ И БАЛАНС -->
         <div class="card">
             <div class="card-header">
-                <h2>🔑 ВАШ ЛИЧНЫЙ API-КЛЮЧ</h2>
+                <h2>🔑 ВАШ API-КЛЮЧ И БАЛАНС</h2>
             </div>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 10px;">Скопируйте этот ключ, он понадобится для всех настроек ниже:</p>
+            
             <div class="key-display-box">
                 <div class="key-text" id="raw-key">Загрузка ключа...</div>
                 <button class="copy-btn" onclick="copyText('raw-key', this)" style="position: static;">Скопировать</button>
             </div>
-            <div class="step-info" style="margin-top: 15px; font-size: 13px;">
-                <span>Модель: <b style="color: #fff;">claude-4.8-opus</b></span>
-                <span style="margin: 0 10px;">|</span>
-                <span>Провайдер: <b style="color: #fff;">Anthropic</b></span>
+
+            <div class="highlight-box" style="margin-top: 20px; border-left-color: var(--balance-color);">
+                <strong style="color: var(--balance-color);">Как проверить остаток токенов?</strong><br>
+                Вы можете самостоятельно отслеживать свой баланс в реальном времени на сайте провайдера.
+                <br>
+                <a href="https://api.nghimmo.com/check-balance" target="_blank" class="action-button">📊 Проверить баланс</a>
+                <p style="font-size: 12px; margin-top: 8px; color: #8b8b9e;">* Нажмите на кнопку, вставьте ваш скопированный API-ключ в поле на открывшемся сайте и нажмите Check.</p>
             </div>
         </div>
 
-        <!-- Секция 1: Claude Code -->
+        <!-- ИНСТРУКЦИЯ CURSOR -->
         <div class="card">
             <div class="card-header">
-                <h2>1. CLAUDE CODE (CLI)</h2>
+                <h2>1. ИНСТРУКЦИЯ ДЛЯ CURSOR</h2>
             </div>
-            
-            <div class="step-info">Windows: <span class="path-box">%APPDATA%\Claude Code\settings.json</span></div>
-            <div class="step-info">Mac / Linux: <span class="path-box">~/.mcp/settings.json</span></div>
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">Откройте файл настроек и полностью замените его содержимое этим кодом:</p>
+            <ul class="step-list">
+                <li>Откройте настройки Cursor (нажмите на шестеренку в правом верхнем углу).</li>
+                <li>Перейдите в раздел <b>Models</b>.</li>
+                <li>Отключите стандартные ползунки (Anthropic / OpenAI).</li>
+                <li>Найдите пункт <b>OpenAI API Key</b> (или Custom Provider).</li>
+                <li>Включите <b>Override OpenAI Base URL</b> и вставьте туда ссылку из блока ниже.</li>
+                <li>В поле <b>API Key</b> вставьте ваш скопированный ключ.</li>
+                <li>В списке моделей (Model names) нажмите <i>+ Add model</i> и вручную впишите: <b>claude-4.8-opus</b></li>
+            </ul>
+
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyText('cursor-settings', this)">Скопировать данные</button>
+<pre id="cursor-settings">Base URL: https://api.nghimmo.com/v1
+API Key:  <span class="key-highlight" id="cursor-key">Загрузка...</span>
+Model:    claude-4.8-opus</pre>
+            </div>
+        </div>
+
+        <!-- ИНСТРУКЦИЯ ROO CODE / CLINE -->
+        <div class="card">
+            <div class="card-header">
+                <h2>2. РАСШИРЕНИЯ VS CODE (ROO CODE / CLINE)</h2>
+            </div>
+            <ul class="step-list">
+                <li>Откройте расширение Roo Code или Cline в вашем VS Code.</li>
+                <li>Нажмите на иконку настроек (шестеренка) в окне расширения.</li>
+                <li>В самом первом поле <b>API Provider</b> выберите <b>OpenAI Compatible</b> (Именно OpenAI Compatible, это важно для правильной маршрутизации!).</li>
+                <li>Заполните оставшиеся поля точно так, как указано в блоке ниже:</li>
+            </ul>
+
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyText('roo-settings', this)">Скопировать данные</button>
+<pre id="roo-settings">API Provider: OpenAI Compatible
+Base URL:     https://api.nghimmo.com/v1
+API Key:      <span class="key-highlight" id="roo-key">Загрузка...</span>
+Model ID:     claude-4.8-opus</pre>
+            </div>
+        </div>
+
+        <!-- ИНСТРУКЦИЯ CLAUDE CODE -->
+        <div class="card">
+            <div class="card-header">
+                <h2>3. CLAUDE CODE (ТЕРМИНАЛ / CLI)</h2>
+            </div>
+            <ul class="step-list">
+                <li>Найдите конфигурационный файл на вашем компьютере:<br>
+                    - Windows: <code>%APPDATA%\Claude Code\settings.json</code><br>
+                    - Mac / Linux: <code>~/.mcp/settings.json</code>
+                </li>
+                <li>Откройте этот файл через любой текстовый редактор (например, блокнот).</li>
+                <li>Полностью удалите всё, что там есть, и вставьте код ниже.</li>
+            </ul>
 
             <div class="code-wrapper">
                 <button class="copy-btn" onclick="copyText('claude-json', this)">Скопировать код</button>
 <pre id="claude-json">{
   "keys": {
-    "anthropic_api_url": "https://api.anthropic.com",
+    "anthropic_api_url": "https://api.nghimmo.com",
     "anthropic_api_key": "<span class="key-highlight" id="claude-key">Загрузка...</span>",
     "model_name": "claude-4.8-opus",
     "anthropic_default_model": "claude-4.8-opus",
     "anthropic_max_tokens": "8192",
-    "anthropic_temperature": "0.5",
-    "claude_code_disable_telemetry": "1",
-    "claude_code_disable_nonessential_traffic": "1"
+    "anthropic_temperature": "0.5"
   }
 }</pre>
-            </div>
-        </div>
-
-        <!-- Секция 2: Roo Code / Cline -->
-        <div class="card">
-            <div class="card-header">
-                <h2>2. РАСШИРЕНИЯ ДЛЯ VS CODE</h2>
-            </div>
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">Для работы в Roo Code, Cline или Continue. Вставьте эти данные в настройки расширения:</p>
-
-            <div class="code-wrapper">
-                <button class="copy-btn" onclick="copyText('roo-settings', this)">Скопировать данные</button>
-<pre id="roo-settings">API Provider: Anthropic
-Base URL:     https://api.anthropic.com
-API Key:      <span class="key-highlight" id="roo-key">Загрузка...</span>
-Model ID:     claude-4.8-opus</pre>
             </div>
         </div>
 
     </div>
 
     <script>
-        // Получение ключа из ссылки
         const urlParams = new URLSearchParams(window.location.search);
         const apiKey = urlParams.get('key');
         
@@ -291,41 +349,35 @@ Model ID:     claude-4.8-opus</pre>
         const statusText = document.getElementById('statusText');
 
         if (apiKey && apiKey.length > 5) {
-            // Успешное подключение
             document.getElementById('raw-key').textContent = apiKey;
-            document.getElementById('claude-key').textContent = apiKey;
+            document.getElementById('cursor-key').textContent = apiKey;
             document.getElementById('roo-key').textContent = apiKey;
+            document.getElementById('claude-key').textContent = apiKey;
             
             statusBadge.classList.remove('error');
             statusText.textContent = 'Подключение активно';
         } else {
-            // Ошибка: ключа нет
-            const errorMsg = "ОШИБКА_ДОСТУПА_ПРОВЕРЬТЕ_ССЫЛКУ";
+            const errorMsg = "ОШИБКА_КЛЮЧ_НЕ_НАЙДЕН";
             document.getElementById('raw-key').textContent = errorMsg;
-            document.getElementById('claude-key').textContent = errorMsg;
+            document.getElementById('cursor-key').textContent = errorMsg;
             document.getElementById('roo-key').textContent = errorMsg;
+            document.getElementById('claude-key').textContent = errorMsg;
             
             document.getElementById('raw-key').style.color = '#ef4444';
-            
             statusBadge.classList.add('error');
             statusText.textContent = 'Ошибка доступа';
         }
 
-        // Функция копирования
         function copyText(elementId, btnElement) {
             const textToCopy = document.getElementById(elementId).innerText;
-            
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = btnElement.innerText;
                 btnElement.innerText = '✅ Скопировано';
                 btnElement.classList.add('copied');
-                
                 setTimeout(() => {
                     btnElement.innerText = originalText;
                     btnElement.classList.remove('copied');
                 }, 2500);
-            }).catch(err => {
-                console.error('Ошибка копирования: ', err);
             });
         }
     </script>
